@@ -1,4 +1,4 @@
-package redis
+package redis_helper
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"github.com/go-redis/redis/v8"
 	"time"
 )
+
+var maxError = errors.New("redis set  reached maximum number of retries")
 
 type RC struct {
 	maxRetry int
@@ -53,5 +55,5 @@ func (rc *RC) SetIfFailRetry(ctx context.Context, key string, funcValue FuncValu
 		}
 		return err
 	}
-	return errors.New("increment reached maximum number of retries")
+	return maxError
 }
