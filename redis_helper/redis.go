@@ -16,7 +16,7 @@ type RC struct {
 
 func NewRC(client *redis.Client, maxRetry ...int) *RC {
 	m := 20
-	if len(maxRetry) == 0 {
+	if len(maxRetry) > 0 {
 		m = maxRetry[0]
 	}
 	return &RC{
