@@ -34,7 +34,7 @@ func TestRC_SetIfFailRetry(t *testing.T) {
 		log.Fatal(err)
 	}
 	client.Set(ctx, "test", userJson, 0)
-	err = rc.SetIfFailRetry(ctx, "test", func(currentValue interface{}) interface{} {
+	err = rc.SetIfFailRetry(ctx, "test", func(currentValue interface{}) (interface{}, error) {
 		u := &User{}
 		err = json.Unmarshal(currentValue.([]byte), u)
 		if err != nil {
@@ -45,7 +45,7 @@ func TestRC_SetIfFailRetry(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		return userJson
+		return userJson, nil
 	}, 0)
 	if err != nil {
 		log.Fatal(err)
