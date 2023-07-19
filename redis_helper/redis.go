@@ -27,10 +27,10 @@ func NewRC(client *redis.Client, maxRetry ...int) *RC {
 
 type FuncValue func(currentValue interface{}) (newValue interface{}, err error)
 
+// SetIfFailRetry 乐观锁
 func (rc *RC) SetIfFailRetry(ctx context.Context, key string, funcValue FuncValue, expiration time.Duration) error {
 
 	txf := func(tx *redis.Tx) error {
-
 		currentValue, err := tx.Get(ctx, key).Bytes()
 		if err != nil && err != redis.Nil {
 			return err
