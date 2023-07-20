@@ -7,13 +7,13 @@ import (
 	"time"
 )
 
-// RetryWithTimeout 指定超时时间
-func RetryWithTimeout(ctx context.Context, timeout time.Duration, fn func(ctx context.Context) error) error {
+// RetryRequestWithTimeout 指定超时时间
+func RetryRequestWithTimeout(ctx context.Context, timeout time.Duration, fn func(ctx context.Context) error) error {
 	return RetryRequest(ctx, timeout, 3, 0, fn)
 }
 
-// RetryWithTimeoutAndTimes 指定超时时间,重试次数
-func RetryWithTimeoutAndTimes(ctx context.Context, timeout time.Duration, retryTimes int, fn func(ctx context.Context) error) error {
+// RetryRequestWithTimeoutAndTimes 指定超时时间,重试次数
+func RetryRequestWithTimeoutAndTimes(ctx context.Context, timeout time.Duration, retryTimes int, fn func(ctx context.Context) error) error {
 	return RetryRequest(ctx, timeout, retryTimes, 0, fn)
 }
 
