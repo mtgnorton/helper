@@ -2,36 +2,37 @@ package retry
 
 import (
 	"context"
-	"fmt"
-	"strings"
 	"time"
 )
 
-// RetryRequestWithTimeout 指定超时时间
-func RetryRequestWithTimeout(ctx context.Context, timeout time.Duration, fn func(ctx context.Context) error) error {
-	return RetryRequest(ctx, timeout, 3, 0, fn)
-}
-
-// RetryRequestWithTimeoutAndTimes 指定超时时间,重试次数
-func RetryRequestWithTimeoutAndTimes(ctx context.Context, timeout time.Duration, retryTimes int, fn func(ctx context.Context) error) error {
-	return RetryRequest(ctx, timeout, retryTimes, 0, fn)
-}
-
-// RetryRequest 指定超时时间,重试次数,重试间隔
-func RetryRequest(ctx context.Context, timeout time.Duration, retryTimes int, interval time.Duration, fn func(ctx context.Context) error) error {
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	for i := 0; i < retryTimes; i++ {
-		err := fn(ctx)
-		// 当err为context deadline exceeded 时，重试
-		fmt.Println(i, err)
-		if err != nil && strings.Contains(err.Error(), "context deadline exceeded") {
-			if interval > 0 {
-				time.Sleep(interval)
-			}
-			continue
-		}
-		return err
+// RetryFixedInterval 在指定的 retryPeriod 时间内, 按照 retryIntervals 重试
+// retryIntervals 重试间隔,如[]int{1,2,3} 表示第一次重试间隔1秒,第二次重试间隔2秒,第三次重试间隔3秒
+// retryPeriod 重试周期,如 retryPeriod=10,表示10秒内重试,超过10秒后,重试次数清零,如果为 0,重试完成后直接退出
+// callback 重试回调函数
+func RetryFixedInterval(ctx context.Context, retryIntervals []int64, retryPeriod int64, callback func(ctx context.Context)) {
+	if len(retryIntervals) == 0 {
+		return
 	}
-	return fmt.Errorf("retry fail")
+
+	lastConnectTime := time.Now().Unix()
+	retryTimes := 0
+	for {
+		now := time.Now().Unix()
+		if retryTimes >= len(retryIntervals) {
+			if retryPeriod <= 0 {
+				return
+			}
+			if now-lastConnectTime < retryPeriod {
+				time.Sleep(time.Second * 10)
+				continue
+			} else {
+				retryTimes = 0
+				lastConnectTime = now
+			}
+		}
+		callback(ctx)
+		// 休眠
+		time.Sleep(time.Second * time.Duration(retryIntervals[retryTimes]))
+		retryTimes++
+	}
 }
