@@ -18,12 +18,12 @@ func TestFlightGroup_Do(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			r, err := g.Do("test", func() error {
+			r, err := g.Do("test", func() (interface{}, error) {
 				time.Sleep(time.Millisecond)
 				writeCount++
-				return nil
-			}, func() (interface{}, error) {
 				return writeCount, nil
+			}, func(w interface{}) (interface{}, error) {
+				return w, nil
 			})
 			if err != nil {
 				fmt.Println(err)

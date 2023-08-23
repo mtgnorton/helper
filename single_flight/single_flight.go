@@ -5,17 +5,18 @@ import (
 )
 
 type (
-	WriteFunc func() error
+	WriteFunc func() (interface{}, error)
 
-	ReadFunc func() (interface{}, error)
+	ReadFunc func(interface{}) (interface{}, error)
 
 	RWSingleFlight interface {
 		Do(key string, wf WriteFunc, rf ReadFunc) (interface{}, error)
 	}
 	call struct {
-		wg    sync.WaitGroup
-		rf    ReadFunc
-		wfErr error
+		wg      sync.WaitGroup
+		rf      ReadFunc
+		wfValue interface{}
+		wfErr   error
 	}
 
 	flightGroup struct {
@@ -37,14 +38,14 @@ func (g *flightGroup) Do(key string, wf WriteFunc, rf ReadFunc) (interface{}, er
 		if c.wfErr != nil {
 			return nil, c.wfErr
 		} else {
-			return c.rf()
+			return c.rf(c.wfValue)
 		}
 	}
 	g.makeCall(c, key, wf, rf)
 	if c.wfErr != nil {
 		return nil, c.wfErr
 	} else {
-		return c.rf()
+		return c.rf(c.wfValue)
 	}
 }
 
@@ -70,7 +71,7 @@ func (g *flightGroup) makeCall(c *call, key string, wf WriteFunc, rf ReadFunc) {
 		c.wg.Done()
 	}()
 
-	c.wfErr = wf()
+	c.wfValue, c.wfErr = wf()
 	if c.wfErr != nil {
 		return
 	}
