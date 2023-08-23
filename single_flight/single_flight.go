@@ -1,7 +1,6 @@
 package single_flight
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -35,7 +34,6 @@ func NewRWSingleFlight() RWSingleFlight {
 func (g *flightGroup) Do(key string, wf WriteFunc, rf ReadFunc) (interface{}, error) {
 	c, done := g.createCall(key)
 	if done {
-		fmt.Println("bb")
 		if c.wfErr != nil {
 			return nil, c.wfErr
 		} else {
@@ -53,12 +51,10 @@ func (g *flightGroup) Do(key string, wf WriteFunc, rf ReadFunc) (interface{}, er
 func (g *flightGroup) createCall(key string) (c *call, done bool) {
 	g.lock.Lock()
 	if c, ok := g.calls[key]; ok {
-		fmt.Println("aaa")
 		g.lock.Unlock()
 		c.wg.Wait()
 		return c, true
 	}
-	fmt.Println(key)
 	c = new(call)
 	c.wg.Add(1)
 	g.calls[key] = c

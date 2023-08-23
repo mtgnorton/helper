@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestFlightGroup_Do(t *testing.T) {
@@ -18,6 +19,7 @@ func TestFlightGroup_Do(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			r, err := g.Do("test", func() error {
+				time.Sleep(time.Millisecond)
 				writeCount++
 				return nil
 			}, func() (interface{}, error) {
