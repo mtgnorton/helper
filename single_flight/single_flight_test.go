@@ -22,7 +22,7 @@ func TestFlightGroup_Do(t *testing.T) {
 				time.Sleep(time.Millisecond)
 				writeCount++
 				return writeCount, nil
-			}, func(w interface{}) (interface{}, error) {
+			}, func(w interface{}, err error) (interface{}, error) {
 				return w, nil
 			})
 			if err != nil {

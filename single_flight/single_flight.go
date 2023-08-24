@@ -7,7 +7,7 @@ import (
 type (
 	WriteFunc func() (interface{}, error)
 
-	ReadFunc func(interface{}) (interface{}, error)
+	ReadFunc func(interface{}, error) (interface{}, error)
 
 	RWSingleFlight interface {
 		Do(key string, wf WriteFunc, rf ReadFunc) (interface{}, error)
@@ -35,18 +35,11 @@ func NewRWSingleFlight() RWSingleFlight {
 func (g *flightGroup) Do(key string, wf WriteFunc, rf ReadFunc) (interface{}, error) {
 	c, done := g.createCall(key)
 	if done {
-		if c.wfErr != nil {
-			return nil, c.wfErr
-		} else {
-			return c.rf(c.wfValue)
-		}
+		return c.rf(c.wfValue, c.wfErr)
+
 	}
 	g.makeCall(c, key, wf, rf)
-	if c.wfErr != nil {
-		return nil, c.wfErr
-	} else {
-		return c.rf(c.wfValue)
-	}
+	return c.rf(c.wfValue, c.wfErr)
 }
 
 func (g *flightGroup) createCall(key string) (c *call, done bool) {
@@ -72,9 +65,6 @@ func (g *flightGroup) makeCall(c *call, key string, wf WriteFunc, rf ReadFunc) {
 	}()
 
 	c.wfValue, c.wfErr = wf()
-	if c.wfErr != nil {
-		return
-	}
 	c.rf = rf
 
 }
