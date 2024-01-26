@@ -9,8 +9,8 @@ import (
 const (
 	epoch          = int64(1700465775306)              // 设置起始时间(时间戳/毫秒)
 	timestampBits  = uint(41)                          // 时间戳占用位数
-	nodeIdBits     = uint(8)                           // 机器id所占位数
-	sequenceBits   = uint(20)                          // 序列所占的位数
+	nodeIdBits     = uint(6)                           // 机器id所占位数
+	sequenceBits   = uint(16)                          // 序列所占的位数
 	timestampMax   = int64(-1 ^ (-1 << timestampBits)) // 时间戳最大值
 	nodeIdMax      = int64(-1 ^ (-1 << nodeIdBits))    // 支持的最大机器id数量
 	sequenceMask   = int64(-1 ^ (-1 << sequenceBits))  // 支持的最大序列id数量
@@ -55,6 +55,7 @@ func (s *Node) Generate() int64 {
 		return 0
 	}
 	s.timestamp = now
-	r := int64((t)<<timestampShift | (s.nodeId << nodeIdShift) | (s.sequence))
+	r := t<<timestampShift | (s.nodeId << nodeIdShift) | (s.sequence)
+
 	return r
 }

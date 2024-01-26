@@ -28,6 +28,7 @@ func TestNode_Generate(t *testing.T) {
 		m := make(map[int64]bool)
 		for v := range ch {
 			t.Log(v)
+			t.Logf("%b", v)
 			if _, ok := m[v]; ok {
 				t.Fatal("重复")
 			}

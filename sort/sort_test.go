@@ -1,6 +1,8 @@
 package sort
 
-import "testing"
+import (
+	"testing"
+)
 
 type user struct {
 	name string
